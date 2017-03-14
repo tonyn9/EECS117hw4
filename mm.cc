@@ -33,11 +33,49 @@ void mm_serial (dtype *C, dtype *A, dtype *B, int N, int K, int M)
   }
 }
 
+double min (double a, double b){
+  //double c;
+  if ( a == b){
+    return a;
+  }else{
+    return (a < b) ? a : b;
+  }
+}
+
 void mm_cb (dtype *C, dtype *A, dtype *B, int N, int K, int M)
 {
   /* =======================================================+ */
   /* Implement your own cache-blocked matrix-matrix multiply  */
   /* =======================================================+ */
+  // Block A : N ROWS and K COLUMNS
+  // Block B : K ROWS and M COLUMNS
+  // Block C : N ROWS and M COLUMNS
+  // will assume that Array C is 0
+
+  int bsize = 850;
+  double sum;
+  int i, j, k, jj, kk;
+  for (jj = 0; jj < M; jj += bsize){
+    /*
+    for (i = 0; i < N; i++){
+      for (j = jj; j < min(jj + bsize, M); j++){
+        C[i * M + j] = 0.0;
+      }
+    }
+    */
+    for (kk = 0; kk < K; kk += bsize){
+      for (i = 0; i < N; i ++){
+        for (j = jj; j < min(jj + bsize, M); j++){
+          sum = 0.0;
+          for (k = kk; k < min(kk + bsize, K); k++){
+            sum += A[i * K + k] * B[k * M + j];
+          }
+          C[i * M + j] += sum;
+        }
+      }
+    }
+  }
+
 }
 
 void mm_sv (dtype *C, dtype *A, dtype *B, int N, int K, int M)
