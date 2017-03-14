@@ -10,7 +10,7 @@ echo "Node:" `hostname`
 echo "Current directory: ${PWD}"
 
 echo ""
-echo "=== Running 5 trials of Matrix Multiple with 1024 1024 1024 ettings ... ==="
+echo "=== Running 5 trials of Matrix Multiple with 1024 1024 1024 settings ... ==="
 for trial in 1 2 3 4 5 ; do
   echo "*** Trial ${trial} ***"
   ./mm 1024 1024 1024
