@@ -27,3 +27,8 @@
 *.exe
 *.out
 *.app
+mm
+
+# .e and .o files
+*.e*
+*.o*
