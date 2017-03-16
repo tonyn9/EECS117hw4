@@ -8,10 +8,10 @@
 #define N_ 4096
 #define K_ 4096
 #define M_ 4096
-#define bsize 850;
+#define bsize 850
 
 typedef double dtype;
-int bsize;
+
 
 void verify(dtype *C, dtype *C_ans, int N, int M)
 {
@@ -83,6 +83,32 @@ void mm_sv (dtype *C, dtype *A, dtype *B, int N, int K, int M)
   // Block C : N ROWS and M COLUMNS
   // will assume that Array C is 0
 
+  // dot product?
+  // loadh and loadl?
+  // loadh sets upper half
+  // loadl sets lower half
+
+  //int bsize = 850;
+  __ m128d vsum, vx1, vx2;
+  double sum;
+  int i, j, k, jj, kk;
+  for (jj = 0; jj < M; jj += bsize){
+    for (kk = 0; kk < K; kk += bsize){
+      for (i = 0; i < N; i ++){
+        for (j = jj; j < min(jj + bsize, M); j++){
+          sum = 0.0;
+          vsum = __mm_setzero_pd();
+          for (k = kk; k < min(kk + bsize, K); k++){
+            vx1 = __mm_load_pd(A[i * K + k]);
+            __mm_loadh_pd(vx2, B[k * M + j]);
+            __mm_loadl_pd(vx2, B[k+1 * M + j]);
+            sum += A[i * K + k] * B[k * M + j];
+          }
+          C[i * M + j] += sum;
+        }
+      }
+    }
+  }
 
 }
 
