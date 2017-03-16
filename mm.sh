@@ -11,7 +11,8 @@ echo "Current directory: ${PWD}"
 
 echo ""
 echo "=== Running 5 trials of Matrix Multiple ==="
-echo "=== with settings: 1024 1024 1024 512 ==="
+echo "=== with array size: 1024 1024 1024 ==="
+echo "=== with block size: 512 ==="
 for trial in 1 2 3 4 5 ; do
   echo "*** Trial ${trial} ***"
   ./mm 1024 1024 1024
