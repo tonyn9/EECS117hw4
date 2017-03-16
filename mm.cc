@@ -8,10 +8,11 @@
 #define N_ 4096
 #define K_ 4096
 #define M_ 4096
-#define bsize 850
+#define bsize_ 512
 
 typedef double dtype;
 
+int bsize;
 
 void verify(dtype *C, dtype *C_ans, int N, int M)
 {
@@ -88,6 +89,28 @@ void mm_sv (dtype *C, dtype *A, dtype *B, int N, int K, int M)
   // loadh sets upper half
   // loadl sets lower half
 
+  //int bsize = 850;
+  /*
+  __m128d vsum, vx1, vx2;
+  double sum;
+  int i, j, k, jj, kk;
+  for (jj = 0; jj < M; jj += bsize){
+    for (kk = 0; kk < K; kk += bsize){
+      for (i = 0; i < N; i ++){
+        for (j = jj; j < min(jj + bsize, M); j++){
+          sum = 0.0;
+          vsum = __mm_setzero_pd();
+          for (k = kk; k < min(kk + bsize, K); k++){
+            vx1 = __mm_load_pd(A[i * K + k]);
+            __mm_loadh_pd(vx2, B[k * M + j]);
+            __mm_loadl_pd(vx2, B[k+1 * M + j]);
+            sum += A[i * K + k] * B[k * M + j];
+          }
+          C[i * M + j] += sum;
+        }
+      }
+    }
+  }*/
 
 }
 
@@ -100,13 +123,13 @@ int main(int argc, char** argv)
     N = atoi (argv[1]);		
     K = atoi (argv[2]);		
     M = atoi (argv[3]);	
-    bsize = atoi (argv[4])	
+    bsize = atoi (argv[4]);	
     printf("N: %d K: %d M: %d\n", N, K, M);
   } else {
     N = N_;
     K = K_;
     M = M_;
-    bsize = 512;
+    bsize = bsize_;
     printf("N: %d K: %d M: %d\n", N, K, M);	
   }
 
