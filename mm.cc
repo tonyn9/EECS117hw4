@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
-
+#include <mmintrin.h>
 #include "timer.c"
 
 #define N_ 4096
 #define K_ 4096
 #define M_ 4096
+#define bsize 850;
 
 typedef double dtype;
+int bsize;
 
 void verify(dtype *C, dtype *C_ans, int N, int M)
 {
@@ -52,17 +54,10 @@ void mm_cb (dtype *C, dtype *A, dtype *B, int N, int K, int M)
   // Block C : N ROWS and M COLUMNS
   // will assume that Array C is 0
 
-  int bsize = 850;
+  
   double sum;
   int i, j, k, jj, kk;
   for (jj = 0; jj < M; jj += bsize){
-    /*
-    for (i = 0; i < N; i++){
-      for (j = jj; j < min(jj + bsize, M); j++){
-        C[i * M + j] = 0.0;
-      }
-    }
-    */
     for (kk = 0; kk < K; kk += bsize){
       for (i = 0; i < N; i ++){
         for (j = jj; j < min(jj + bsize, M); j++){
@@ -80,9 +75,15 @@ void mm_cb (dtype *C, dtype *A, dtype *B, int N, int K, int M)
 
 void mm_sv (dtype *C, dtype *A, dtype *B, int N, int K, int M)
 {
-  /* =======================================================+ */
+  /* =========================================================+ */
   /* Implement your own SIMD-vectorized matrix-matrix multiply  */
-  /* =======================================================+ */
+  /* =========================================================+ */
+  // Block A : N ROWS and K COLUMNS
+  // Block B : K ROWS and M COLUMNS
+  // Block C : N ROWS and M COLUMNS
+  // will assume that Array C is 0
+
+
 }
 
 int main(int argc, char** argv)
@@ -90,15 +91,17 @@ int main(int argc, char** argv)
   int i, j, k;
   int N, K, M;
 
-  if(argc == 4) {
+  if(argc == 5) {
     N = atoi (argv[1]);		
     K = atoi (argv[2]);		
-    M = atoi (argv[3]);		
+    M = atoi (argv[3]);	
+    bsize = atoi (argv[4])	
     printf("N: %d K: %d M: %d\n", N, K, M);
   } else {
     N = N_;
     K = K_;
     M = M_;
+    bsize = 512;
     printf("N: %d K: %d M: %d\n", N, K, M);	
   }
 
