@@ -10,6 +10,7 @@
 #define K_ 4096
 #define M_ 4096
 #define bsize_ 512
+#define BLOCk_SIZE 16
 
 typedef double dtype;
 
@@ -33,6 +34,25 @@ void mm_serial (dtype *C, dtype *A, dtype *B, int N, int K, int M)
       for(int k = 0; k < K; k++) {
         C[i * M + j] += A[i * K + k] * B[k * M + j];
       }
+    }
+  }
+}
+void mm_vector (dtype *C, dtype *A, dtype *B, int N)
+{
+  int i, j, k;
+  __m128d a_vec, b_vec, mult_vec;
+      double z[2] = {0.0, 0.0};
+  double c[2];
+  for(int i = 0; i < N; i++) {
+    for(int j = 0; j < N; j++) {
+      mult_vec = _mm_load_pd(z);
+      for(int k = 0; k < N; k += 2) {
+        a_vec = _mm_load_pd(A + (i * N) + k);
+        b_vec = _mm_load_pd(B + (j * N) + k);
+        mult_vec = _mm_add_pd(_mm_mul_pd(a_vec, b_vec), mult_vec);
+      }
+      _mm_store_pd(c, mult_vec);
+      C[i * N + j] += c[0] + c[1];
     }
   }
 }
