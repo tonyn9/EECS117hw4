@@ -3,6 +3,7 @@
 #include <time.h>
 #include <assert.h>
 #include <mmintrin.h>
+#include <x86intrin.h>
 #include "timer.c"
 
 #define N_ 4096
@@ -55,7 +56,7 @@ void mm_cb (dtype *C, dtype *A, dtype *B, int N, int K, int M)
   // Block C : N ROWS and M COLUMNS
   // will assume that Array C is 0
 
-  
+
   double sum;
   int i, j, k, jj, kk;
   for (jj = 0; jj < M; jj += bsize){
@@ -111,6 +112,52 @@ void mm_sv (dtype *C, dtype *A, dtype *B, int N, int K, int M)
       }
     }
   }*/
+{
+  int i,j,k;
+  int row, column;
+  dtype *A_temp = (dtype*) malloc (BLOCk_SIZE * BLOCk_SIZE * sizeof (dtype));
+  dtype *B_temp = (dtype*) malloc (BLOCk_SIZE * BLOCk_SIZE * sizeof (dtype));
+  dtype *C_temp = (dtype*) malloc (BLOCk_SIZE * BLOCk_SIZE * sizeof (dtype));
+
+  for(int i = 0; i < N; i+=BLOCk_SIZE)
+  {
+    for(int j = 0; j < M; j+=BLOCk_SIZE)
+    {
+      for(row = 0; row < BLOCk_SIZE; row++)
+      {
+        for(column = 0; column < BLOCk_SIZE; column++)
+        {
+          C_temp[row*BLOCk_SIZE + column] = C[(i+row)*M + j + column];
+        }
+      }
+      for(int k = 0; k < K; k+=BLOCk_SIZE)
+      {
+        for(row = 0; row < BLOCk_SIZE; row++)
+        {
+          for(column = 0; column < BLOCk_SIZE; column++)
+          {
+            A_temp[row*BLOCk_SIZE + column] = A[(i+row)*K + k + column];
+          }
+        }
+        for(row = 0; row < BLOCk_SIZE; row++)
+        {
+          for(column = 0; column < BLOCk_SIZE; column++)
+          {
+            B_temp[column*BLOCk_SIZE + row] = B[(k+row)*M + j + column];
+          }
+        }
+        mm_vector(C_temp, A_temp, B_temp, BLOCk_SIZE);
+      }
+      for(row = 0; row < BLOCk_SIZE; row++)
+      {
+        for(column = 0; column < BLOCk_SIZE; column++)
+        {
+          C[(i+row)*M + j + column] = C_temp[row*BLOCk_SIZE + column];
+        }
+      }
+    }
+  }
+}
 
 }
 
@@ -120,17 +167,17 @@ int main(int argc, char** argv)
   int N, K, M;
 
   if(argc == 5) {
-    N = atoi (argv[1]);		
-    K = atoi (argv[2]);		
-    M = atoi (argv[3]);	
-    bsize = atoi (argv[4]);	
+    N = atoi (argv[1]);
+    K = atoi (argv[2]);
+    M = atoi (argv[3]);
+    bsize = atoi (argv[4]);
     printf("N: %d K: %d M: %d\n", N, K, M);
   } else {
     N = N_;
     K = K_;
     M = M_;
     bsize = bsize_;
-    printf("N: %d K: %d M: %d\n", N, K, M);	
+    printf("N: %d K: %d M: %d\n", N, K, M);
   }
 
   dtype *A = (dtype*) malloc (N * K * sizeof (dtype));
